@@ -25,7 +25,7 @@ Resource for seeds [https://simplemaps.com/data/world-cities](https://simplemaps
 name `worldcities.csv`.
 4. Start job from console using the command `php yii job/get-forecast <city> <date start> <date end>`.
 5. Run queues from console using the command `php yii queue/listen`.
-6.Settings for Nginx you can see in the [file](/Nginx_1.14_vhost.conf) `Nginx_1.14_vhost.conf` 
+6. Settings for Nginx you can see in the [file](/Nginx_1.14_vhost.conf) `Nginx_1.14_vhost.conf` 
 
 
 
