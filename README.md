@@ -1,16 +1,16 @@
 # PHP Technical Task
 This simple application was written in `Yii2-Framework (Advanced)`. 
 
-> *Note:* Application was destination for testing!!!
+> *Note:* This application was intended for testing!!!
 
-In the process of writing the application, the following technologies were used:
+In the process of writing the application, were used the following technologies:
 - PHP 7.2;
 - PostgreSQL;
 - Composer;
 - Nginx 1.14;
 - Open Server 5.3;
 
-Instructions for started application:
+Instructions for startomg the application:
 
 1. Additional plugin has been installed:
     - PHP Db Seeder - https://github.com/tebazil/db-seeder
