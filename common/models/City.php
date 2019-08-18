@@ -62,4 +62,12 @@ class City extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Country::className(), ['id' => 'country_id']);
     }
+
+    public static function getCityByName($city) {
+        return self::find()
+            ->with(['country'])
+            ->where(['name' => $city])
+            ->asArray()
+            ->one();
+    }
 }

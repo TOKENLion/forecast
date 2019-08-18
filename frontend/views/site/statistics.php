@@ -1,13 +1,8 @@
 <?php
 
 /* @var $this yii\web\View */
-/* @var $form yii\bootstrap\ActiveForm */
-/* @var $model \common\models\LoginForm */
 
-use yii\helpers\Html;
-use yii\bootstrap\ActiveForm;
-
-$this->title = 'Stats';
+$this->title = 'Statistics';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="panel panel-default">
@@ -61,7 +56,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'searching' => false,
                     'ordering' =>  false,
                     'ajax' => [
-                        'url' => '/index.php/site/datatables-stats',
+                        'url' => '/index.php/site/datatables-statistics',
                         'type'=> 'POST',
                         'data' => new \yii\web\JsExpression('function(data) { ' .
                             'data.date_start =  $("#date_start").val();

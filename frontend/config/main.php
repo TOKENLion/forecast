@@ -42,7 +42,7 @@ return [
             'enablePrettyUrl' => true,
 //            'enableStrictParsing' => true,
             'rules' => [
-                'site/history' => 'site/history'
+                'site/history/<city:.*>' => 'site/history'
             ],
         ],
 

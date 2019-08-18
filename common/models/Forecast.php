@@ -59,4 +59,42 @@ class Forecast extends \yii\db\ActiveRecord
     {
         return $this->hasOne(City::className(), ['id' => 'city_id']);
     }
+
+    public static function getForecastByCityId($cityId) {
+        return self::find()
+            ->where(['city_id' => $cityId])
+            ->asArray()
+            ->all();
+    }
+
+    public static function getCountForecastByInterval($dateStart, $dateEnd) {
+        return self::find()
+            ->select('city_id, COUNT(DISTINCT city_id) as cities')
+            ->where([
+                'between',
+                'when_created',
+                $dateStart,
+                $dateEnd,
+            ])
+            ->groupBy('city_id')
+            ->sum('c.cities');
+    }
+
+    public static function getForecastByInterval($dateStart, $dateEnd, $start, $limit) {
+        return self::find()
+            ->with(['city', 'city.country'])
+            ->select('city_id, min(temperature), max(temperature), avg(temperature)')
+            ->where([
+                'between',
+                'when_created',
+                $dateStart,
+                $dateEnd
+            ])
+            ->groupBy('city_id')
+//                ->orderBy($orderBy)
+            ->limit($start)
+            ->offset($limit)
+            ->asArray()
+            ->all();
+    }
 }
