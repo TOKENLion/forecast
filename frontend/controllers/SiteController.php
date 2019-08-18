@@ -5,12 +5,15 @@ use frontend\models\ResendVerificationEmailForm;
 use frontend\models\VerifyEmailForm;
 use Yii;
 use yii\base\InvalidArgumentException;
+use yii\helpers\Html;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\models\LoginForm;
 use common\models\City;
+use common\models\Forecast;
+use common\components\Helper;
 use frontend\models\PasswordResetRequestForm;
 use frontend\models\ResetPasswordForm;
 use frontend\models\SignupForm;
@@ -261,40 +264,99 @@ class SiteController extends Controller
 
     public function actionStats()
     {
-        return $this->render('stats');
+        $data = [
+            'dateStart' => Yii::$app->formatter->asDate('-1 day', 'php:d.m.Y'),
+            'dateEnd' => Yii::$app->formatter->asDate('now', 'php:d.m.Y')
+        ];
+        return $this->render('stats', $data);
+    }
+
+    public function actionHistory()
+    {
+        $city = "Moscow";
+        $currentCity = City::find()
+            ->with(['country'])
+            ->where(['name' => $city])
+            ->asArray()
+            ->one();
+
+        if (empty($currentCity)) {
+            $data['error'] = 'Sorry, but history for select city doesn\'t fount!';
+        }
+
+        $data['city'] = $currentCity;
+
+        $forecasts = Forecast::find()
+            ->where(['city_id' => $currentCity['id']])
+            ->asArray()
+            ->all();
+
+        foreach ($forecasts as $forecast) {
+            $date = Yii::$app->formatter->asDate($forecast['when_created'], 'php:M d, Y');
+            $data['forecasts'][$date][] = $forecast;
+        }
+
+        return $this->render('history', $data);
     }
 
     public function actionDatatablesStats()
     {
-        $t = City::find()->all();
-//        $d =  [
-//            'datatables' => [
-//                'class' => 'nullref\datatable\DataTableAction',
-//                'query' => City::find()->all(),
-//                'applyOrder' => function($query, $columns, $order) {
-//                    //custom ordering logic
-//                    $orderBy = [];
-//                    foreach ($order as $orderItem) {
-//                        $orderBy[$columns[$orderItem['column']]['data']] = $orderItem['dir'] == 'asc' ? SORT_ASC : SORT_DESC;
-//                    }
-//                    return $query->orderBy($orderBy);
-//                },
-//                'applyFilter' => function($query, $columns, $search) {
-//                    //custom search logic
-//                    $modelClass = $query->modelClass;
-//                    $schema = $modelClass::getTableSchema()->columns;
-//                    foreach ($columns as $column) {
-//                        if ($column['searchable'] == 'true' && array_key_exists($column['data'], $schema) !== false) {
-//                            $value = empty($search['value']) ? $column['search']['value'] : $search['value'];
-//                            $query->orFilterWhere(['like', $column['data'], $value]);
-//                        }
-//                    }
-//                    return $query;
-//                },
-//            ],
-//        ];
-//        echo '<pre>' . print_r($d['datatables']['query'], true) . '</pre>';
-        echo '<pre>' . print_r($t, true) . '</pre>';
-        exit();
+        $request = Yii::$app->request;
+
+        $forecasts = array();
+        $totalForecasts = Forecast::find()
+            ->select('city_id, COUNT(DISTINCT city_id) as cities')
+            ->groupBy('city_id')
+            ->sum('c.cities');
+
+
+        if (!empty($totalForecasts)) {
+//            $orderBy = "";
+//            $requestOrder = $request->post('order');
+//            $requestColumns = $request->post('columns');
+//
+//            if (!empty($requestOrder[0]) && !empty($requestColumns[$requestOrder[0]['column']])) {
+//                $orderBy = $requestColumns[$requestOrder[0]['column']]['data'] . ' ' . $requestOrder[0]['dir'];
+//            }
+
+            $forecasts = Forecast::find()
+                ->with(['city', 'city.country'])
+                ->select('city_id, min(temperature), max(temperature), avg(temperature)')
+                ->where([
+                    'between',
+                    'when_created',
+                    Yii::$app->formatter->asDate($request->post('date_start'), 'php:U'),
+                    Yii::$app->formatter->asDate($request->post('date_end'), 'php:U')
+                ])
+                ->groupBy('city_id')
+//                ->orderBy($orderBy)
+                ->limit($request->post('length'))
+                ->offset($request->post('start'))
+                ->asArray()
+                ->all();
+        }
+
+        $output = array(
+            "draw" => $request->post('draw'),
+            "recordsTotal" => $totalForecasts,
+            "recordsFiltered" => count($forecasts),
+            "data" => []
+        );
+
+        $symbol = '&#8451;';
+        if (!empty($forecasts)) {
+            foreach ($forecasts as $forecast) {
+                $output['data'][] = [
+                    'country' => $forecast['city']['country']['name'],
+                    'city' => $forecast['city']['name'],
+                    'max_temperature' => Helper::convertFahrenheitToCelsius($forecast['max']) . Html::decode($symbol),
+                    'min_temperature' => Helper::convertFahrenheitToCelsius($forecast['min']) . Html::decode($symbol),
+                    'avg_temperature' => Helper::convertFahrenheitToCelsius($forecast['avg']) . Html::decode($symbol),
+                    'actions' => '',
+                ];
+            }
+        }
+
+        return $this->asJson($output);
     }
 }

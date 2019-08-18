@@ -99,12 +99,4 @@ class SiteController extends Controller
 
         return $this->goHome();
     }
-
-    public function actionShow()
-    {
-        foreach (Country::find()->all() as $country) {
-            echo '<pre>' . print_r($country->name, true) . '</pre>';
-            echo '<pre>' . print_r($country->cities, true) . '</pre>';
-        }
-    }
 }

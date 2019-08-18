@@ -38,9 +38,11 @@ return [
         ],
 
         'urlManager' => [
-            'enablePrettyUrl' => true,
             'showScriptName' => false,
+            'enablePrettyUrl' => true,
+//            'enableStrictParsing' => true,
             'rules' => [
+                'site/history' => 'site/history'
             ],
         ],
 
