@@ -8,7 +8,7 @@ In the process of writing the application, were used the following technologies:
 - PostgreSQL;
 - Composer;
 - Nginx 1.14;
-- Open Server 5.3;
+- Open Server 5.3 (https://ospanel.io/);
 
 Instructions for startomg the application:
 
